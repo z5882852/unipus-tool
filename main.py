@@ -4,7 +4,6 @@ from requests import Session
 
 from ws import ws_connect
 
-
 HEADERS = {
     "Accept": "application/json, text/javascript, */*; q=0.01",
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
@@ -24,6 +23,7 @@ HEADERS = {
     "sec-ch-ua-platform": "\"Windows\""
 }
 
+
 def choose_course(courses_data):
     """
     选择课程，返回课程ID
@@ -37,6 +37,7 @@ def choose_course(courses_data):
     print("=====================")
     index = int(input("请选择课程: "))
     return courses_data[index].get("tutorial_id")
+
 
 def choose_units(units_data):
     """
@@ -57,6 +58,7 @@ def choose_units(units_data):
         units.append(unit_data[1])
     return required, units
 
+
 if __name__ == '__main__':
     username = ""  # 用户名
     password = ""  # 密码
@@ -67,9 +69,7 @@ if __name__ == '__main__':
     # 登录
     auth = UAuth(session, username, password)
     data = auth.login()
-    if data is None:
-        exit()
-    
+
     # 获取用户数据
     open_id = data.get("openid")
     user_info = auth.print_user_info(open_id)
@@ -83,16 +83,12 @@ if __name__ == '__main__':
 
     course.get_courses(ticket=ticket)
     mes, course_info = course.get_courses()
-    if course_info is None:
-        exit()
 
     # 获取 headers中 X-Annotator-Auth-Token
     auth_token = auth.set_token()
 
     mes, course_data = course.get_courses_index()
     print(mes)
-    if course_data is None:
-        exit()
 
     # 选择课程
     tutorial_id = choose_course(course_data)
@@ -101,20 +97,14 @@ if __name__ == '__main__':
     # 刷时长
     ws_connect(open_id, auth_token, tutorial_id, 5)
 
-    # 以下为自动答题内容
+    # # 以下为自动答题内容
     # mes, units_data = course.get_units()
     # print(mes)
-    # if units_data is None:
-    #     exit()
+    #
     # required, units = choose_units(units_data)
-
+    #
     # sections_list = course.get_all_sections(units, required)
     # if sections_list == []:
-    #     print("无可学习内容！")
-    #     exit()
+    #     raise Exception("无可学习内容！")
     # for section in sections_list:
     #  course.study_section(section)
-
-
-
-    

@@ -5,13 +5,14 @@ import requests
 from requests import Session
 from PIL import Image
 
+
 class UAuth:
-    def __init__(self, session:Session, username, password):
+    def __init__(self, session: Session, username, password):
         self.session = session
         self.username = username
         self.password = password
         # self.session = session
-    
+
     def login_api(self, captcha="", encodeCaptha=None):
         """
         登录
@@ -38,9 +39,9 @@ class UAuth:
         if data.get("code") == "1502":
             return 3, f"登录失败，{data.get('msg', '未知错误')}", None
         elif data.get("code") == "0":
-            return 0,f"登录成功！用户名: {data.get('rs', {}).get('nickname', '未知')}", data.get('rs', None)
-        return 4,f"{data.get('msg', '未知错误')}", None
-    
+            return 0, f"登录成功！用户名: {data.get('rs', {}).get('nickname', '未知')}", data.get('rs', None)
+        return 4, f"{data.get('msg', '未知错误')}", None
+
     def get_captcha_img(self):
         url = "https://sso.unipus.cn/sso/4.0/sso/image_captcha2"
         response = self.session.post(url)
@@ -48,43 +49,41 @@ class UAuth:
             return 1, f"获取验证码失败，status_code:{response.status_code}", None
         data = response.json()
         if data.get("code") == "0" and data.get('rs', None) is not None:
-            return 0,f"成功", data.get('rs', None)
-        return 2,f"{data.get('msg', '未知错误')}", None
-    
+            return 0, f"成功", data.get('rs', None)
+        return 2, f"{data.get('msg', '未知错误')}", None
+
     def show_captcha_img(self, base64_data):
-        with open('./data/captcha/captcha.jpg','wb') as file:
+        with open('./data/captcha/captcha.jpg', 'wb') as file:
             image = base64.b64decode(base64_data)
             file.write(image)
-        img=Image.open('./data/captcha/captcha.jpg')
+        img = Image.open('./data/captcha/captcha.jpg')
         img.show()
-    
+
     def get_captcha(self):
-        code,mes,data = self.get_captcha_img()
+        code, mes, data = self.get_captcha_img()
         if code != 0 and data is not None:
             print(mes)
         img_data = data.get("image")
         encodeCaptha = data.get("encodeCaptha")
         self.show_captcha_img(img_data)
         captcha_code = input("请输入验证码: ")
-        return captcha_code,encodeCaptha
- 
+        return captcha_code, encodeCaptha
+
     def login(self):
-        code,mes,data = self.login_api()
+        code, mes, data = self.login_api()
         if code == 0:
             return data
         if mes != "需要图片或者滑块验证码":
-            return None
+            raise Exception(f"登录失败, {mes}")
         while True:
-            captcha_code,encodeCaptha = self.get_captcha()
-            code,mes,data = self.login_api(captcha_code,encodeCaptha)
+            captcha_code, encodeCaptha = self.get_captcha()
+            code, mes, data = self.login_api(captcha_code, encodeCaptha)
             print(mes)
             if code == 0:
                 return data
-            if mes == "验证码错误":
-                continue
-            return None
-    
-    def login_ticket(self,school_id, ticket):
+            raise Exception(f"登录失败, {mes}")
+
+    def login_ticket(self, school_id, ticket):
         url = "https://u.unipus.cn/user/comm/login"
         params = {
             "school_id": school_id,
@@ -97,7 +96,7 @@ class UAuth:
         response = self.session.get(url)
         print(response.text)
         print(response)
-    
+
     def print_user_info(self, openId):
         url = "https://ucamapi.unipus.cn/rpc/api/user-info"
         params = {
@@ -119,6 +118,7 @@ class UAuth:
             print(f'学校名: {data["result"]["user"]["schoolName"]}')
         except Exception as e:
             print(f"获取用户信息失败, Exception: {e}")
+            raise Exception(e)
         return data
 
     def set_token(self):

@@ -29,7 +29,7 @@ class UCourse:
         params = {"school_id": self.shcool_id}
         response = self.session.get(url, params=params, allow_redirects=False)
         if response.status_code != 200:
-            return f"获取课程失败，status_code:{response.status_code}", None
+            raise Exception(f"获取课程失败，status_code:{response.status_code}")
         try:
             html = BeautifulSoup(response.text, "lxml")
             courses_data = html.find_all("div", class_="class-content")
@@ -47,7 +47,7 @@ class UCourse:
                 data.append(temp)
             return f"获取课程成功", data
         except Exception as e:
-            return f"获取课程失败，Exception: {e}", None
+            raise Exception(f"获取课程失败，Exception:{e}")
 
     def get_courses(self, ticket=None):
         """
@@ -64,11 +64,11 @@ class UCourse:
         if ticket is not None:
             return
         if response.status_code != 200:
-            return f"获取课程失败，status_code:{response.status_code}", None
+            raise Exception(f"获取课程失败，status_code:{response.status_code}")
         try:
             return "获取课程成功", response.json()
         except Exception as e:
-            return f"获取课程失败，Exception:{e}", None
+            raise Exception(f"获取课程失败，Exception:{e}")
 
     def get_units(self):
         """
@@ -77,7 +77,7 @@ class UCourse:
         url = f"https://ucontent.unipus.cn/course/api/v2/course_progress/{self.tutorial_id}/{self.open_id}/default/"
         response = self.session.get(url)
         if response.status_code != 200:
-            return f"获取课程单元信息失败，status_code:{response.status_code}", None
+            raise Exception(f"获取课程单元信息失败，status_code:{response.status_code}")
         data = response.json()
         units_data = data.get("rt", {}).get("units", {})
         units = []
