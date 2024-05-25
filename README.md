@@ -11,6 +11,13 @@
 
 > 刷时长时请不要在其他设备登录，否则不计入时长
 
+## 快速开始
+修改main.py,键入账号密码
+```
+pip install -r requirements.txt
+python main.py
+```
+
 ## 其他
 **本项目提供了其他API，有需要的请自取**
 ```
